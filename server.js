@@ -4,7 +4,7 @@ console.log('Testing basic console output');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const OpenAI = require('openai');
+import OpenAI from "openai";
 const fs = require('fs');
 require('dotenv').config();
 

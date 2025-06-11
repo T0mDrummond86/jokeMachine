@@ -13,18 +13,34 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTopic = null;
     let currentVoice = null;
 
-    // Load available comedians
+    // Clear existing options
+    voiceSelect.innerHTML = '';
+
+    // Add a default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = "Select a comedian's style";
+    voiceSelect.appendChild(defaultOption);
+
+    // Fetch comedians and populate dropdown
     fetch('/api/comedians')
-        .then(response => response.json())
+        .then(res => res.json())
         .then(comedians => {
-            voiceSelect.innerHTML = '<option value="">Select a comedian...</option>' +
-                comedians.map(comedian => 
-                    `<option value="${comedian.id}">${comedian.name} - ${comedian.style}</option>`
-                ).join('');
+            comedians.forEach(comedian => {
+                const option = document.createElement('option');
+                option.value = comedian.value;
+                option.textContent = comedian.label;
+                voiceSelect.appendChild(option);
+            });
         })
-        .catch(error => {
-            console.error('Error loading comedians:', error);
-            voiceSelect.innerHTML = '<option value="">Error loading comedians</option>';
+        .catch(err => {
+            // Show error in dropdown if fetch fails
+            voiceSelect.innerHTML = '';
+            const errorOption = document.createElement('option');
+            errorOption.value = '';
+            errorOption.textContent = 'Error loading comedians';
+            voiceSelect.appendChild(errorOption);
+            console.error('Failed to load comedians:', err);
         });
 
     async function analyzeJoke(joke, voice) {
@@ -41,11 +57,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 // Update analysis cards
-                document.getElementById('setup-analysis').textContent = data.analysis.setup || 'No setup analysis available';
-                document.getElementById('punchline-analysis').textContent = data.analysis.punchline || 'No punchline analysis available';
-                document.getElementById('style-analysis').textContent = data.analysis.styleelements || 'No style analysis available';
-                document.getElementById('strengths-analysis').textContent = data.analysis.strengths || 'No strengths analysis available';
-                document.getElementById('improvements-analysis').textContent = data.analysis.potentialimprovements || 'No improvements analysis available';
+                const setupCard = document.getElementById('setup-analysis');
+                const punchlineCard = document.getElementById('punchline-analysis');
+                const styleCard = document.getElementById('style-analysis');
+                const strengthsCard = document.getElementById('strengths-analysis');
+                const improvementsCard = document.getElementById('improvements-analysis');
+                const feedbackCard = document.getElementById('feedback-suggestions');
+
+                setupCard.textContent = data.analysis.setup || "No setup analysis available";
+                punchlineCard.textContent = data.analysis.punchline || "No punchline analysis available";
+                styleCard.textContent = data.analysis.styleElements || "No style analysis available";
+                strengthsCard.textContent = data.analysis.strengths || "No strengths analysis available";
+                improvementsCard.textContent = data.analysis.improvements || "No improvements analysis available";
+                feedbackCard.textContent = data.analysis.feedback || "";
 
                 // Update feedback suggestions
                 const suggestionsList = document.getElementById('feedback-suggestions');
@@ -170,4 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     topicInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') generateJoke();
     });
+
+    const selectedVoice = voiceSelect.value;
+    const selectedLabel = voiceSelect.options[voiceSelect.selectedIndex].text;
 });

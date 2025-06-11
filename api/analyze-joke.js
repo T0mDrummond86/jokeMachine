@@ -15,6 +15,21 @@ const comedianVoices = {
   'chris-rock': "High-energy, sharp social commentary, and punchy delivery."
 };
 
+function parseAnalysis(text) {
+  const getSection = (label) => {
+    const match = text.match(new RegExp(`- ${label}:([\\s\\S]*?)(?=- [A-Z]|$)`, 'i'));
+    return match ? match[1].trim().replace(/^"|"$/g, '') : '';
+  };
+  return {
+    setup: getSection('Setup'),
+    punchline: getSection('Punchline'),
+    styleElements: getSection('Style elements'),
+    strengths: getSection('Strengths'),
+    improvements: getSection('Potential improvements'),
+    feedback: getSection('Suggested feedback'),
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -30,25 +45,29 @@ export default async function handler(req, res) {
 
 Joke: "${joke}"
 
-Break down the joke into:
-- Setup
-- Punchline
-- Style elements
-- Strengths
-- Potential improvements
-- Suggested feedback for the comedian
+Break down the joke into the following sections, each starting with a dash and label:
+- Setup: ...
+- Punchline: ...
+- Style elements: ...
+- Strengths: ...
+- Potential improvements: ...
+- Suggested feedback: ...
 
-Respond in a structured, clear way.`;
+Respond ONLY with these sections, no extra commentary.`;
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
         { role: 'system', content: prompt }
       ],
-      max_tokens: 200,
+      max_tokens: 300,
       temperature: 0.7
     });
-    const analysis = completion.choices[0]?.message?.content?.trim() || 'No analysis generated.';
-    res.status(200).json({ analysis });
+
+    const content = completion.choices[0]?.message?.content?.trim() || '';
+    const analysis = parseAnalysis(content);
+
+    res.status(200).json(analysis);
   } catch (error) {
     console.error('Analyze Joke API error:', error);
     res.status(500).json({ error: 'Failed to analyze joke', details: error.message });
