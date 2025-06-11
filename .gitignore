@@ -29,4 +29,7 @@ coverage
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Legacy server file
+server.js 
