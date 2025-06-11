@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joke Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 1.5em;
+            margin-top: 40px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .joke-container {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            min-height: 100px;
+            background-color: #f8f9fa;
+        }
+        .joke-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        .comedian-name {
+            font-style: italic;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+        }
+        .feedback-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .feedback-section.hidden {
+            display: none;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .button-group button {
+            flex: 1;
+        }
+        .modify-btn {
+            background-color: #2ecc71;
+        }
+        .modify-btn:hover {
+            background-color: #27ae60;
+        }
+        .new-joke-btn {
+            background-color: #e74c3c;
+        }
+        .new-joke-btn:hover {
+            background-color: #c0392b;
+        }
+        .analysis-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        .analysis-section.hidden {
+            display: none;
+        }
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .analysis-card {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .analysis-card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .analysis-card p {
+            color: #34495e;
+            margin: 0;
+            line-height: 1.4;
+        }
+        .feedback-suggestions {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 5px;
+        }
+        .feedback-suggestions h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .feedback-suggestions ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .feedback-suggestions li {
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Joke Generator</h1>
+        <div class="input-group">
+            <label for="topic">Enter a topic:</label>
+            <input type="text" id="topic" placeholder="e.g., programming, cats, work...">
+        </div>
+        <div class="input-group">
+            <label for="voice">Select a comedian's style:</label>
+            <select id="voice">
+                <option value="">Loading comedians...</option>
+            </select>
+        </div>
+        <button id="generateBtn">Generate Joke</button>
+        <div class="joke-container">
+            <div class="joke-text">Enter a topic, select a comedian, and click the button to get a joke!</div>
+        </div>
+        <div class="analysis-section hidden">
+            <h2>Joke Analysis</h2>
+            <div class="analysis-grid">
+                <div class="analysis-card">
+                    <h3>Setup</h3>
+                    <p id="setup-analysis"></p>
+                </div>
+                <div class="analysis-card">
+                    <h3>Punchline</h3>
+                    <p id="punchline-analysis"></p>
+                </div>
+                <div class="analysis-card">
+                    <h3>Style Elements</h3>
+                    <p id="style-analysis"></p>
+                </div>
+                <div class="analysis-card">
+                    <h3>Strengths</h3>
+                    <p id="strengths-analysis"></p>
+                </div>
+                <div class="analysis-card">
+                    <h3>Potential Improvements</h3>
+                    <p id="improvements-analysis"></p>
+                </div>
+            </div>
+            <div class="feedback-suggestions">
+                <h3>Suggested Feedback</h3>
+                <ul id="feedback-suggestions"></ul>
+            </div>
+        </div>
+        <div class="feedback-section hidden">
+            <div class="input-group">
+                <label for="feedback">How would you like to modify this joke?</label>
+                <textarea id="feedback" placeholder="e.g., Make it shorter, Make it more edgy, Change the punchline..."></textarea>
+            </div>
+            <div class="button-group">
+                <button id="modifyBtn" class="modify-btn">Modify Joke</button>
+                <button id="newJokeBtn" class="new-joke-btn">Generate New Joke</button>
+            </div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
